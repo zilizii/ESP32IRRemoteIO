@@ -59,16 +59,16 @@ ESP32Remote::~ESP32Remote() {
 ESP32_RMT_Rx::ESP32_RMT_Rx(int gpiopin, int channelnumber)
 {
 	if (gpiopin>=GPIO_NUM_0 && gpiopin<GPIO_NUM_MAX) {
-	    gpionum = gpiopin;
-	  } else {
-	    gpionum = (int)GPIO_NUM_22;
-	  }
-	  if (channelnumber<=RMT_CHANNEL_0 && channelnumber<RMT_CHANNEL_MAX) {
-		  rmtport = channelnumber;
-	  } else {
-		  rmtport = (int)RMT_CHANNEL_0;
-	  }
-	  ESP32_RMT_Rx::initDone = false;
+		gpionum = gpiopin;
+	} else {
+		gpionum = (int)GPIO_NUM_22;
+	}
+	if (channelnumber<=RMT_CHANNEL_0 && channelnumber<RMT_CHANNEL_MAX) {
+		rmtport = channelnumber;
+	} else {
+		rmtport = (int)RMT_CHANNEL_0;
+	}
+	ESP32_RMT_Rx::initDone = false;
 }
 
 ESP32_RMT_Rx::~ESP32_RMT_Rx() {
@@ -78,21 +78,21 @@ ESP32_RMT_Rx::~ESP32_RMT_Rx() {
 void ESP32_RMT_Rx::init(){
 
 
-	 rmt_config_t rmt_rx;
-	 	    rmt_rx.channel = (rmt_channel_t)ESP32_RMT_Rx::rmtport;
-	 	    rmt_rx.gpio_num = (gpio_num_t)ESP32_RMT_Rx::gpionum;
-	 	    rmt_rx.clk_div = RMT_CLK_DIV;
-	 	    rmt_rx.mem_block_num = 1;
-	 	    rmt_rx.rmt_mode = RMT_MODE_RX;
-	 	    rmt_rx.rx_config.filter_en = true;
-	 	    rmt_rx.rx_config.filter_ticks_thresh = 100;
-	 	    rmt_rx.rx_config.idle_threshold = rmt_item32_tIMEOUT_US / 10 * (RMT_TICK_10_US);
-	 	    rmt_config(&rmt_rx);
-	 	    rmt_driver_install(rmt_rx.channel, 1000, 0);
-	 	   	rmt_get_ringbuf_handle(rmt_rx.channel, &ringBuf);
+	rmt_config_t rmt_rx;
+	rmt_rx.channel = (rmt_channel_t)ESP32_RMT_Rx::rmtport;
+	rmt_rx.gpio_num = (gpio_num_t)ESP32_RMT_Rx::gpionum;
+	rmt_rx.clk_div = RMT_CLK_DIV;
+	rmt_rx.mem_block_num = 1;
+	rmt_rx.rmt_mode = RMT_MODE_RX;
+	rmt_rx.rx_config.filter_en = true;
+	rmt_rx.rx_config.filter_ticks_thresh = 100;
+	rmt_rx.rx_config.idle_threshold = rmt_item32_tIMEOUT_US / 10 * (RMT_TICK_10_US);
+	rmt_config(&rmt_rx);
+	rmt_driver_install(rmt_rx.channel, 1000, 0);
+	rmt_get_ringbuf_handle(rmt_rx.channel, &ringBuf);
 
-	 	   	rmt_rx_start(rmt_rx.channel, true);
-	 	    ESP32_RMT_Rx::initDone = true;
+	rmt_rx_start(rmt_rx.channel, true);
+	ESP32_RMT_Rx::initDone = true;
 }
 
 uint8_t ESP32_RMT_Rx::readIRrec(void){
@@ -102,14 +102,14 @@ uint8_t ESP32_RMT_Rx::readIRrec(void){
 	rmt_item32_t* item = (rmt_item32_t*) xRingbufferReceive((RingbufHandle_t)ringBuf, (size_t *)&itemSize, (TickType_t)portMAX_DELAY);
 
 	int numItems = itemSize / sizeof(rmt_item32_t);
-	  int i;
-	  rmt_item32_t *p = item;
-	  for (i=0; i<numItems; i++) {
-	    p++;
-	  }
-	  ESP32_RMT_Rx::printTiming(item, numItems);
-	  //command=decodeNEC(item, numItems);
-	  vRingbufferReturnItem(ringBuf, (void*) item);
+	int i;
+	rmt_item32_t *p = item;
+	for (i=0; i<numItems; i++) {
+		p++;
+	}
+	ESP32_RMT_Rx::printTiming(item, numItems);
+	//command=decodeNEC(item, numItems);
+	vRingbufferReturnItem(ringBuf, (void*) item);
 
 	return command;
 }
@@ -118,71 +118,71 @@ bool ESP32_RMT_Rx::isInRange(rmt_item32_t item, int lowDuration, int highDuratio
 	uint32_t highValue = item.duration0 * 10 / RMT_TICK_10_US;
 	uint32_t lowValue = item.duration1 * 10 / RMT_TICK_10_US;
 
-  //ESP_LOGI(TAG, "lowValue=%d, highValue=%d, lowDuration=%d, highDuration=%d", lowValue, highValue, lowDuration, highDuration);
+	//ESP_LOGI(TAG, "lowValue=%d, highValue=%d, lowDuration=%d, highDuration=%d", lowValue, highValue, lowDuration, highDuration);
 
-  if (lowValue < (lowDuration - tolerance) || lowValue > (lowDuration + tolerance) ||
-      (highValue != 0 &&
-      (highValue < (highDuration - tolerance) || highValue > (highDuration + tolerance)))) {
-    return false;
-  }
-  return true;
+	if (lowValue < (lowDuration - tolerance) || lowValue > (lowDuration + tolerance) ||
+			(highValue != 0 &&
+					(highValue < (highDuration - tolerance) || highValue > (highDuration + tolerance)))) {
+		return false;
+	}
+	return true;
 }
 
 bool ESP32_RMT_Rx::NEC_is0(rmt_item32_t item) {
-  return isInRange(item, NEC_BIT_MARK, NEC_BIT_MARK, 100);
+	return isInRange(item, NEC_BIT_MARK, NEC_BIT_MARK, 100);
 }
 
 bool ESP32_RMT_Rx::NEC_is1(rmt_item32_t item) {
-  return isInRange(item, NEC_BIT_MARK, NEC_ONE_SPACE, 100);
+	return isInRange(item, NEC_BIT_MARK, NEC_ONE_SPACE, 100);
 }
 
 uint8_t ESP32_RMT_Rx::decodeNEC(rmt_item32_t *data, int numItems) {
-  if (!isInRange(data[0], NEC_HDR_MARK, NEC_HDR_SPACE, 200)) {
-    ESP_LOGD(TAG, "Not an NEC");
-    return 0;
-  }
-  int i;
-  uint8_t address = 0, notAddress = 0, command = 0, notCommand = 0;
-  int accumCounter = 0;
-  uint8_t accumValue = 0;
-  for (i=1; i<numItems; i++) {
-    if (NEC_is0(data[i])) {
-      ESP_LOGD(TAG, "%d: 0", i);
-      accumValue = accumValue >> 1;
-    } else if (NEC_is1(data[i])) {
-      ESP_LOGD(TAG, "%d: 1", i);
-      accumValue = (accumValue >> 1) | 0x80;
-    } else {
-      ESP_LOGD(TAG, "Unknown");
-    }
-    if (accumCounter == 7) {
-      accumCounter = 0;
-      ESP_LOGD(TAG, "Byte: 0x%.2x", accumValue);
-      if (i==8) {
-        address = accumValue;
-      } else if (i==16) {
-        notAddress = accumValue;
-      } else if (i==24) {
-        command = accumValue;
-      } else if (i==32) {
-        notCommand = accumValue;
-      }
-      accumValue = 0;
-    } else {
-      accumCounter++;
-    }
-  }
-  ESP_LOGD(TAG, "Address: 0x%.2x, NotAddress: 0x%.2x", address, notAddress ^ 0xff);
-  if (address != (notAddress ^ 0xff) || command != (notCommand ^ 0xff)) {
-    // Data mis match
-    return 0;
-  }
-  // Serial.print("Address: ");
-  // Serial.print(address);
-  // Serial.print(" Command: ");
-  // Serial.println(command);
+	if (!isInRange(data[0], NEC_HDR_MARK, NEC_HDR_SPACE, 200)) {
+		ESP_LOGD(TAG, "Not an NEC");
+		return 0;
+	}
+	int i;
+	uint8_t address = 0, notAddress = 0, command = 0, notCommand = 0;
+	int accumCounter = 0;
+	uint8_t accumValue = 0;
+	for (i=1; i<numItems; i++) {
+		if (NEC_is0(data[i])) {
+			ESP_LOGD(TAG, "%d: 0", i);
+			accumValue = accumValue >> 1;
+		} else if (NEC_is1(data[i])) {
+			ESP_LOGD(TAG, "%d: 1", i);
+			accumValue = (accumValue >> 1) | 0x80;
+		} else {
+			ESP_LOGD(TAG, "Unknown");
+		}
+		if (accumCounter == 7) {
+			accumCounter = 0;
+			ESP_LOGD(TAG, "Byte: 0x%.2x", accumValue);
+			if (i==8) {
+				address = accumValue;
+			} else if (i==16) {
+				notAddress = accumValue;
+			} else if (i==24) {
+				command = accumValue;
+			} else if (i==32) {
+				notCommand = accumValue;
+			}
+			accumValue = 0;
+		} else {
+			accumCounter++;
+		}
+	}
+	ESP_LOGD(TAG, "Address: 0x%.2x, NotAddress: 0x%.2x", address, notAddress ^ 0xff);
+	if (address != (notAddress ^ 0xff) || command != (notCommand ^ 0xff)) {
+		// Data mis match
+		return 0;
+	}
+	// Serial.print("Address: ");
+	// Serial.print(address);
+	// Serial.print(" Command: ");
+	// Serial.println(command);
 
-  return command;
+	return command;
 }
 
 void ESP32_RMT_Rx::printTiming(rmt_item32_t * data, int numItems) {
@@ -201,16 +201,16 @@ ESP32_RMT_Tx::ESP32_RMT_Tx(int gpiopin, int channelnumber) {
 	ESP32_RMT_Tx::rmtport = channelnumber;
 
 	if (gpiopin>=GPIO_NUM_0 && gpiopin<GPIO_NUM_MAX) {
-		    gpionum = gpiopin;
-		  } else {
-		    gpionum = (int)GPIO_NUM_23;
-		  }
-		  if (channelnumber<=RMT_CHANNEL_0 && channelnumber<RMT_CHANNEL_MAX) {
-			  rmtport = channelnumber;
-		  } else {
-			  rmtport = (int)RMT_CHANNEL_1;
-		  }
-		  ESP32_RMT_Tx::initDone = false;
+		gpionum = gpiopin;
+	} else {
+		gpionum = (int)GPIO_NUM_23;
+	}
+	if (channelnumber<=RMT_CHANNEL_0 && channelnumber<RMT_CHANNEL_MAX) {
+		rmtport = channelnumber;
+	} else {
+		rmtport = (int)RMT_CHANNEL_1;
+	}
+	ESP32_RMT_Tx::initDone = false;
 }
 
 /*
@@ -235,17 +235,17 @@ void ESP32_RMT_Tx::init() {
 	rmt_config(&rmt_tx);
 	rmt_driver_install(rmt_tx.channel, 0, 0);
 
-   	this->initDone = true;
+	this->initDone = true;
 }
 
 /*
  * @brief Build register value of waveform for one data bit
  */
 void ESP32_RMT_Tx::generateRMTItem(rmt_item32_t * item, int high_us, int low_us) {
-    item->level0 = 1;
-    item->duration0 = (high_us) / 10 * RMT_TICK_10_US;
-    item->level1 = 0;
-    item->duration1 = (low_us) / 10 * RMT_TICK_10_US;
+	item->level0 = 1;
+	item->duration0 = (high_us) / 10 * RMT_TICK_10_US;
+	item->level1 = 0;
+	item->duration1 = (low_us) / 10 * RMT_TICK_10_US;
 }
 
 /*
@@ -333,7 +333,7 @@ ErrData PulseDistanceCoding::DecodeInput(rmt_item32_t * item, uint& address, uin
 				address |= 1;
 			} else {
 
-			// or low
+				// or low
 				l_bResult = ESP32_RMT_Rx::isInRange(item[counter],this->_data->_lowTimeLow,this->_data->_lowTimeHigh, this->_data->_tolerance);
 				if(l_bResult && this->_data->_isInvertedAddressRequired) {
 					l_bResult &= ESP32_RMT_Rx::isInRange(item[counter + this->_data->_addressLength],this->_data->_highTimeLow,this->_data->_highTimeHigh, this->_data->_tolerance);
@@ -355,17 +355,17 @@ ErrData PulseDistanceCoding::DecodeInput(rmt_item32_t * item, uint& address, uin
 			counter += this->_data->_addressLength;
 		}
 	}
-/*------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- * Data Check start here
- *------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- */
+	/*------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	 * Data Check start here
+	 *------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	 */
 	// idea check the whole length and substract the addresses lenght and do not forget the header....
 	lengthOfProtocol = this->_data->_length - counter + 1;
 
 	if(this->_data->_isDataInverseAddedRequired) {
 		lengthOfProtocol /= 2;
 	}
-	printf("lengthOfProtocol calculation check %i", lengthOfProtocol);
+	//printf("lengthOfProtocol calculation check %i", lengthOfProtocol);
 	for(int i = 0; i< lengthOfProtocol; i++, counter++) {
 		l_bResult = ESP32_RMT_Rx::isInRange(item[counter],this->_data->_highTimeLow,this->_data->_highTimeHigh, this->_data->_tolerance);
 
@@ -396,6 +396,11 @@ ErrData PulseDistanceCoding::DecodeInput(rmt_item32_t * item, uint& address, uin
 	return ErrData::NoError;
 }
 
+/*
+ * Purpose: Generate the output structure based on the Protocol data.
+ * Input  : Pointer to the rmt structure, Unsigned Int for address and data
+ * Return : void...
+ */
 
 void PulseDistanceCoding::GenerateOutput(rmt_item32_t* item, uint address, uint data) {
 	//Generate Head
@@ -450,44 +455,72 @@ void PulseDistanceCoding::GenerateOutput(rmt_item32_t* item, uint address, uint 
 	for( int i=0; i< remainingLength; i++) {
 
 		if((data >> (remainingLength - i -1)) & 0x1) {
-						// Done : recalculate the Data
-						// Done : inverse data
-						ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_highTimeHigh, this->_data->_highTimeLow);
+			// Done : recalculate the Data
+			// Done : inverse data
+			ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_highTimeHigh, this->_data->_highTimeLow);
 
-						if(this->_data->_isDataInverseAddedRequired) {
-							ESP32_RMT_Tx::generateRMTItem(& item[counter + remainingLength] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
-						}
+			if(this->_data->_isDataInverseAddedRequired) {
+				ESP32_RMT_Tx::generateRMTItem(& item[counter + remainingLength] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
+			}
 
-					}else{
-						ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
-						if(this->_data->_isDataInverseAddedRequired) {
-							ESP32_RMT_Tx::generateRMTItem(& item[counter + remainingLength] , this->_data->_highTimeHigh, this->_data->_highTimeLow);
-						}
-					}
-					counter++;
+		}else{
+			ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
+			if(this->_data->_isDataInverseAddedRequired) {
+				ESP32_RMT_Tx::generateRMTItem(& item[counter + remainingLength] , this->_data->_highTimeHigh, this->_data->_highTimeLow);
+			}
+		}
+		counter++;
 	}
 	if(this->_data->_isDataInverseAddedRequired) {
 		counter += remainingLength;
 		remainingLength -= this->_data->_addressLength;
 
-			}
+	}
 
 
 	//Done: Stop bit
 	if(this->_data->_isStop)
 	{
-
 		ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_stopSignHigh, this->_data->_stopSignLow);
-
 	}
 
 	//return
 
 }
 
-
+/*
+ * Purpose: Generate output items without to check details
+ * data shall be stored in a proper way.
+ */
 void PulseDistanceCoding::GenerateOutPut(rmt_item32_t* item, uint data) {
-// todo implement
+
+	int counter = 0;
+	int remainingLength = 0;
+
+	ESP32_RMT_Tx::generateRMTItem( & item[counter], static_cast<int>(this->_data->_headerHigh), static_cast<int>(this->_data->_headerLow) );
+	// Check next item
+	remainingLength = this->_data->_length;
+	counter++;
+
+	for(int i=0; i < remainingLength; i++ ) {
+		if((data >> (remainingLength - i -1)) & 0x1) {
+			// Done : recalculate the Data
+			// Done : inverse data
+			ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_highTimeHigh, this->_data->_highTimeLow);
+
+			if(this->_data->_isDataInverseAddedRequired) {
+				ESP32_RMT_Tx::generateRMTItem(& item[counter + remainingLength] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
+			}
+		}else{
+			ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_lowTimeHigh, this->_data->_lowTimeLow);
+		}
+		counter++;
+	}
+	if(this->_data->_isStop)
+	{
+		ESP32_RMT_Tx::generateRMTItem(& item[counter] , this->_data->_stopSignHigh, this->_data->_stopSignLow);
+	}
+	//return
 }
 
 

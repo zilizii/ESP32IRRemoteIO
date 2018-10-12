@@ -50,7 +50,7 @@ using namespace std;
 /// Function section
 
 extern "C" {
-	void app_main(void);
+void app_main(void);
 }
 
 #define GPIO_INPUT_IO_0     GPIO_NUM_18
@@ -72,8 +72,8 @@ ESP32_RMT_Tx irsend(23, 1);
  * */
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
-    uint32_t gpio_num = (uint32_t) arg;
-    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+	uint32_t gpio_num = (uint32_t) arg;
+	xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
 
@@ -137,7 +137,15 @@ void rmtOutput(void * parameters){
 			//printf("Some important address : %04x and data %04x \n",address,data);
 			irsend.sendIR(item,ChineseLED->_length + 2);
 			vTaskDelay(2000 / portTICK_PERIOD_MS);
+			//test the New Function in a way..
 		}
+		address = 0x0;
+		data = 0x0;
+		ChineseLEDDriver->GenerateOutPut(item, 0x00F7C837);
+		ChineseLEDDriver->DecodeInput(item, address, data);
+		printf("Some important address : %04x and data %04x \n",address,data);
+		irsend.sendIR(item,ChineseLED->_length + 2);
+		vTaskDelay(10000 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }
@@ -156,8 +164,8 @@ void button(void * parameters) {
 		{
 			switch(gpio_num) {
 			case(GPIO_INPUT_IO_0):
-				printf("Buttoniser \n");
-				break;
+						printf("Buttoniser \n");
+			break;
 			default:
 				printf("GPIO : %i \n",gpio_num);
 			};
@@ -200,8 +208,8 @@ void app_main(void) {
 
 	xTaskCreate(rmtOutput, "test task", 2048, NULL , 10, NULL);
 	while(1) {
-	        vTaskDelay(1000 / portTICK_PERIOD_MS);
-	    }
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
 
 
 	//xTaskCreate(rtmInput, "remote control input task", 2048, NULL , 10, NULL);

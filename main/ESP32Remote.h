@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
+#include <map>
+#include <vector>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -23,6 +25,7 @@
 #include "driver/rmt.h"
 #include "driver/periph_ctrl.h"
 #include "soc/rmt_reg.h"
+
 
 
 
@@ -51,6 +54,13 @@ struct ProtocolData_t {
 	bool _isStop;
 	uint _stopSignHigh;
 	uint _stopSignLow;
+};
+
+struct ProtocolCommands_t {
+	std::string _name;
+	bool full;
+	uint _address;
+	uint _data;
 };
 
 enum ErrData : uint {NoError = 0, HeaderNoMatch, AddressError, DataError };
@@ -107,6 +117,7 @@ private:
 /*
  * Description of a class : Base (abstract) class for the protocols
  * Responsible for the Creation/identification/Read functionalities in high level
+ * Commands as well needs to store, because of not independent from the Protocol....
  */
 class BaseRMTClass {
 protected:

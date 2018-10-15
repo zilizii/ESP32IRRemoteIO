@@ -96,6 +96,7 @@ void rtmInput(void * parameters) {
 void rmtOutput(void * parameters){
 
 	std::map<std::string, pair<int,int>> storage ;
+	vector<BaseRMTClass> ProtocolDescriptions;
 
 	storage.insert(std::pair<string,pair<int,int>> ("RED", pair<int,int>(0xF7,0x20) ));
 	storage.insert(std::pair<string,pair<int,int>> ("GREEN", pair<int,int>(0xF7,0xA0) ));
@@ -120,8 +121,37 @@ void rmtOutput(void * parameters){
 	ChineseLED->_isStop = true;
 	ChineseLED->_stopSignHigh = 560;
 	ChineseLED->_stopSignLow = 1000;
-	rmt_item32_t* item = new rmt_item32_t[ChineseLED->_length + 2];
+
+	// for testing purposes... the NEC protocol
+	ProtocolData_t * NEC = new ProtocolData_t();
+	NEC->_name = "NEC";
+	NEC->_length = 32;
+	NEC->_headerHigh   = 9000;
+	NEC->_headerLow    = 4500;
+	NEC->_highTimeHigh = 560;
+	NEC->_highTimeLow  = 1690;
+	NEC->_lowTimeHigh  = 560;
+	NEC->_lowTimeLow   = 560;
+	NEC->_isAddress = true;
+	NEC->_isInvertedAddressRequired = true;
+	NEC->_addressLength = 8;
+	NEC->_isDataInverseAddedRequired = true;
+	NEC->_tolerance = 50;
+	NEC->_isStop = true;
+	NEC->_stopSignHigh = 560;
+	NEC->_stopSignLow = 20;
+
+
+
+
+	rmt_item32_t* item = new rmt_item32_t[ChineseLED->_length + 2]; // normaly it must be the longest.....
 	PulseDistanceCoding * ChineseLEDDriver = new  PulseDistanceCoding(ChineseLED);
+	PulseDistanceCoding * NEC_P = new PulseDistanceCoding(NEC);
+
+	ProtocolDescriptions.push_back(ChineseLEDDriver);
+	ProtocolDescriptions.push_back(NEC_P);
+
+	/*
 	ChineseLEDDriver->GenerateOutput(item,0x00F7, 0xC0);
 	ChineseLEDDriver->DecodeInput(item, address, data);
 	printf("Some important address : %04x and data %04x \n",address,data);
@@ -147,6 +177,7 @@ void rmtOutput(void * parameters){
 		irsend.sendIR(item,ChineseLED->_length + 2);
 		vTaskDelay(10000 / portTICK_PERIOD_MS);
 	}
+	*/
 	vTaskDelete(NULL);
 }
 

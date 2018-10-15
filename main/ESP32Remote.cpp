@@ -492,7 +492,7 @@ void PulseDistanceCoding::GenerateOutput(rmt_item32_t* item, uint address, uint 
  * Purpose: Generate output items without to check details
  * data shall be stored in a proper way.
  */
-void PulseDistanceCoding::GenerateOutPut(rmt_item32_t* item, uint data) {
+void PulseDistanceCoding::GenerateOutPutRaw(rmt_item32_t* item, uint data) {
 
 	int counter = 0;
 	int remainingLength = 0;

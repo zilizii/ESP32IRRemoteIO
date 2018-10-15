@@ -134,14 +134,14 @@ void rmtOutput(void * parameters){
 			data = 0x0;
 			ChineseLEDDriver->GenerateOutput(item, (itr->second).first , (itr->second).second);
 			ChineseLEDDriver->DecodeInput(item, address, data);
-			//printf("Some important address : %04x and data %04x \n",address,data);
+
 			irsend.sendIR(item,ChineseLED->_length + 2);
 			vTaskDelay(2000 / portTICK_PERIOD_MS);
 			//test the New Function in a way..
 		}
 		address = 0x0;
 		data = 0x0;
-		ChineseLEDDriver->GenerateOutPut(item, 0x00F7C837);
+		ChineseLEDDriver->GenerateOutPutRaw(item, 0x00F7C837);
 		ChineseLEDDriver->DecodeInput(item, address, data);
 		printf("Some important address : %04x and data %04x \n",address,data);
 		irsend.sendIR(item,ChineseLED->_length + 2);

@@ -15,4 +15,18 @@ Check : 24_b_IR_remote.xlsm for the exlored IR codes --> done by this demo appli
 Step 1: Reset the controller
 Step 2: ESP 32 shall generate the TURN ON command via IR for the RGB Controller to turn on
 Step 3: ESP 32 shall generate the IR codes for a cycle demo where RGB colours cycle.
-Issue was the Stop bit position. --> Solved :-) 
+Issue was the Stop bit position. --> Solved :-)
+
+2nd Goal :
+	NEC Protocol data gathered. Some part already in the code from the beggining
+	Status : Partially Done
+	Plan to be discover the LG protocol as well
+	Status : NYS (Not Yet Started)
+3rd Goal :
+		MQTT is not requires much. This change as well requires to turn on Wifi. I have to rethink the strategy for BlueTooth 
+			but in this case I have to develop more.
+	Status : NYS (Not Yet Started)
+
+4th Goal :
+	Step for automatisation 
+	Status : NYS (Not Yet Started)

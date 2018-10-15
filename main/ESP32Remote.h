@@ -115,7 +115,10 @@ public:
 	BaseRMTClass(ProtocolData_t *Protocol) : _data(Protocol) {};
 	std::string getName()
 	{
-		return this->_data->_name;
+		if(this->_data != NULL)
+			return this->_data->_name;
+		else
+			return nullptr;
 	};
 
 	uint getTolerance() {return this->_data->_tolerance;};
@@ -128,7 +131,7 @@ public:
 	virtual ~BaseRMTClass(){};
 	virtual void GenerateOutput(rmt_item32_t* item, uint address, uint data) =0;
 	// just send out the data
-	virtual void GenerateOutPut(rmt_item32_t* item, uint data)=0;
+	virtual void GenerateOutPutRaw(rmt_item32_t* item, uint data)=0;
 	virtual bool CheckInput(rmt_item32_t* item) =0;
 };
 
@@ -150,7 +153,7 @@ public:
 	bool CheckInput(rmt_item32_t* item);
 	ErrData DecodeInput(rmt_item32_t * item, uint& address, uint& data);
 	void GenerateOutput(rmt_item32_t* item, uint address, uint data);
-	void GenerateOutPut(rmt_item32_t* item, uint data);
+	void GenerateOutPutRaw(rmt_item32_t* item, uint data);
 };
 
 #endif /* MAIN_ESP32REMOTE_H_ */

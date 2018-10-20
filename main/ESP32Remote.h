@@ -57,11 +57,16 @@ struct ProtocolData_t {
 };
 
 struct ProtocolCommands_t {
-	std::string _name;
-	bool full;
+	std::string _name; // hmm may not be here....
 	uint _address;
 	uint _data;
+	ProtocolCommands_t();
+	ProtocolCommands_t(std::string name, uint address, uint data) : _name(name), _address(address), _data(data) {}
+
+	bool operator==(const ProtocolCommands_t& rhs) const {return this->_name == rhs._name && this->_address == rhs._address && this->_data == rhs._data ;}
 };
+
+
 
 enum ErrData : uint {NoError = 0, HeaderNoMatch, AddressError, DataError };
 
@@ -122,6 +127,7 @@ private:
 class BaseRMTClass {
 protected:
 	ProtocolData_t * _data = NULL;
+	std::vector<ProtocolCommands_t> _commands;
 public:
 	BaseRMTClass(ProtocolData_t *Protocol) : _data(Protocol) {};
 	std::string getName()
@@ -144,6 +150,13 @@ public:
 	// just send out the data
 	virtual void GenerateOutPutRaw(rmt_item32_t* item, uint data)=0;
 	virtual bool CheckInput(rmt_item32_t* item) =0;
+	bool AddCommand(ProtocolCommands_t &);
+	bool CheckCommand(ProtocolCommands_t &);
+	void DeleteCommand(ProtocolCommands_t &);
+	bool UpdateCommand(ProtocolCommands_t &);
+//	virtual bool SendCommand(std::string command) = 0;
+//	virtual bool SendCommand(ProtocolCommands_t command) = 0;
+	ProtocolCommands_t * GetCommand(std::string command);
 };
 
 class PulseDistanceCoding : public BaseRMTClass {

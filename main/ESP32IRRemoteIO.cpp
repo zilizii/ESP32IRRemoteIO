@@ -96,7 +96,7 @@ void rtmInput(void * parameters) {
 void rmtOutput(void * parameters){
 
 	std::map<std::string, pair<int,int>> storage ;
-	vector<BaseRMTClass> ProtocolDescriptions;
+	vector<BaseRMTClass*> ProtocolDescriptions;
 
 	storage.insert(std::pair<string,pair<int,int>> ("RED", pair<int,int>(0xF7,0x20) ));
 	storage.insert(std::pair<string,pair<int,int>> ("GREEN", pair<int,int>(0xF7,0xA0) ));
@@ -122,6 +122,7 @@ void rmtOutput(void * parameters){
 	ChineseLED->_stopSignHigh = 560;
 	ChineseLED->_stopSignLow = 1000;
 
+
 	// for testing purposes... the NEC protocol
 	ProtocolData_t * NEC = new ProtocolData_t();
 	NEC->_name = "NEC";
@@ -145,7 +146,13 @@ void rmtOutput(void * parameters){
 
 
 	rmt_item32_t* item = new rmt_item32_t[ChineseLED->_length + 2]; // normaly it must be the longest.....
-	PulseDistanceCoding * ChineseLEDDriver = new  PulseDistanceCoding(ChineseLED);
+	PulseDistanceCoding * ChineseLEDDriver = new PulseDistanceCoding(ChineseLED);
+	ProtocolCommands_t *cpt = new ProtocolCommands_t("RED", 0x7F,0x20);
+	ChineseLEDDriver->AddCommand( *cpt );
+	cpt = new ProtocolCommands_t("BLUE", 0x7F,0xA0);
+	ChineseLEDDriver->AddCommand( *cpt );
+	cpt = new ProtocolCommands_t("GREEN", 0x7F,0x60);
+	ChineseLEDDriver->AddCommand( *cpt );
 	PulseDistanceCoding * NEC_P = new PulseDistanceCoding(NEC);
 
 	ProtocolDescriptions.push_back(ChineseLEDDriver);

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <stdio.h>
 #include <string>
+#include <algorithm>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -277,12 +278,48 @@ int ESP32_RMT_Tx::getRMTPort(void) {
 }
 
 void ESP32_RMT_Tx::sendIR(rmt_item32_t* item, int itemNum) {
-	// todo: implementation shall be finish
 	rmt_write_items(static_cast<rmt_channel_t>(this->rmtport), item,itemNum, true);
-
 	rmt_wait_tx_done(static_cast<rmt_channel_t>(this->rmtport), portMAX_DELAY);
-
 }
+
+bool BaseRMTClass::CheckCommand(ProtocolCommands_t & command) {
+	std::vector<ProtocolCommands_t>::iterator it;
+	it = std::find(this->_commands.begin(), this->_commands.end(),command);
+	return (it != this->_commands.end());
+}
+
+bool BaseRMTClass::AddCommand(ProtocolCommands_t & command) {
+	if(this->CheckCommand(command))
+		return true;
+	this->_commands.push_back(command);
+		return true;
+}
+
+void BaseRMTClass::DeleteCommand(ProtocolCommands_t & command) {
+	this->_commands.erase(std::remove(this->_commands.begin(), this->_commands.end(),command),this->_commands.end());
+}
+
+bool BaseRMTClass::UpdateCommand(ProtocolCommands_t & command) {
+	for (std::vector<ProtocolCommands_t>::iterator it = this->_commands.begin(); it!= this->_commands.end(); it++) {
+		if(it->_name == command._name) {
+			*(it) = command;
+			return true;
+		}
+	}
+	return false;
+}
+
+ProtocolCommands_t * BaseRMTClass::GetCommand(std::string name) {
+	ProtocolCommands_t * l_rP = nullptr;
+	for (std::vector<ProtocolCommands_t>::iterator it = this->_commands.begin(); it!= this->_commands.end(); it++) {
+			if(it->_name == name) {
+				l_rP = &(*it);
+				return l_rP;
+			}
+		}
+	return nullptr;
+}
+
 
 
 

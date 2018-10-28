@@ -341,6 +341,8 @@ ErrData PulseDistanceCoding::DecodeInput(rmt_item32_t * item, uint& address, uin
 	bool l_bResult = false;
 	int counter = 0;
 	uint32_t lengthOfProtocol = 0;
+	address = 0;
+	data = 0;
 
 	// checking the Header Data
 	l_bResult = ESP32_RMT_Rx::isInRange(item[counter],  this->_data->_headerLow, this->_data->_headerHigh, this->_data->_tolerance);

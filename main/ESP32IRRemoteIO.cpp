@@ -84,6 +84,8 @@ void rtmInput(void * parameters) {
 	irrecv.init();
 	while(true)
 	{
+
+
 		command=irrecv.readIRrec();
 		if (command!=0) {
 			printf("NEC Command received : %i\n",command);
@@ -95,14 +97,9 @@ void rtmInput(void * parameters) {
 
 void rmtOutput(void * parameters){
 
-	std::map<std::string, pair<int,int>> storage ;
 	vector<BaseRMTClass*> ProtocolDescriptions;
 
-	storage.insert(std::pair<string,pair<int,int>> ("RED", pair<int,int>(0xF7,0x20) ));
-	storage.insert(std::pair<string,pair<int,int>> ("GREEN", pair<int,int>(0xF7,0xA0) ));
-	storage.insert(std::pair<string,pair<int,int>> ("BLUE", pair<int,int>(0xF7,0x60) ));
-	uint address = 0x00;
-	uint data = 0x00;
+
 	irsend.init();
 	ProtocolData_t * ChineseLED = new ProtocolData_t();
 	ChineseLED->_name = "Chinese LED";
@@ -142,49 +139,42 @@ void rmtOutput(void * parameters){
 	NEC->_stopSignHigh = 560;
 	NEC->_stopSignLow = 20;
 
-
-
-
 	rmt_item32_t* item = new rmt_item32_t[ChineseLED->_length + 2]; // normaly it must be the longest.....
+	rmt_item32_t* item2 = new rmt_item32_t[ChineseLED->_length + 2];
 	PulseDistanceCoding * ChineseLEDDriver = new PulseDistanceCoding(ChineseLED);
-	ProtocolCommands_t *cpt = new ProtocolCommands_t("RED", 0x7F,0x20);
+	ProtocolCommands_t *cpt = nullptr;
+	cpt = new ProtocolCommands_t("ON", 0x00F7,0x00C0);
 	ChineseLEDDriver->AddCommand( *cpt );
-	cpt = new ProtocolCommands_t("BLUE", 0x7F,0xA0);
+	cpt = new ProtocolCommands_t("OFF", 0x00F7,0x0040);
 	ChineseLEDDriver->AddCommand( *cpt );
-	cpt = new ProtocolCommands_t("GREEN", 0x7F,0x60);
+	cpt = new ProtocolCommands_t("RED", 0x00F7,0x0020);
 	ChineseLEDDriver->AddCommand( *cpt );
-	PulseDistanceCoding * NEC_P = new PulseDistanceCoding(NEC);
+	cpt = new ProtocolCommands_t("BLUE", 0x00F7,0x00A0);
+	ChineseLEDDriver->AddCommand( *cpt );
+	cpt = new ProtocolCommands_t("GREEN", 0x00F7,0x0060);
+	ChineseLEDDriver->AddCommand( *cpt );
+	//PulseDistanceCoding * NEC_P = new PulseDistanceCoding(NEC);
 
 	ProtocolDescriptions.push_back(ChineseLEDDriver);
-	ProtocolDescriptions.push_back(NEC_P);
+	//ProtocolDescriptions.push_back(NEC_P);
 
-	/*
-	ChineseLEDDriver->GenerateOutput(item,0x00F7, 0xC0);
-	ChineseLEDDriver->DecodeInput(item, address, data);
-	printf("Some important address : %04x and data %04x \n",address,data);
+	ProtocolCommands_t *p = nullptr;
+	p =	ChineseLEDDriver->GetCommand("ON");
+	ChineseLEDDriver->GenerateOutput(item,p->_address, p->_data);
 	irsend.sendIR(item,ChineseLED->_length + 2);
-
+	vTaskDelay(1000/ portTICK_PERIOD_MS);
 	for(;;) {
+		 p =  ChineseLEDDriver->GetCommand("RED");
+		 ChineseLEDDriver->GenerateOutput(item,p->_address, p->_data);
+		 irsend.sendIR(item,ChineseLED->_length + 2);
+		 vTaskDelay(2000 / portTICK_PERIOD_MS);
+		 p =  ChineseLEDDriver->GetCommand("GREEN");
+		 ChineseLEDDriver->GenerateOutput(item,p->_address, p->_data);
+		 irsend.sendIR(item,ChineseLED->_length + 2);
 
-		for(std::map<std::string,pair<int,int>>::iterator itr = storage.begin(); itr != storage.end(); ++itr ) {
-			address = 0x0;
-			data = 0x0;
-			ChineseLEDDriver->GenerateOutput(item, (itr->second).first , (itr->second).second);
-			ChineseLEDDriver->DecodeInput(item, address, data);
-
-			irsend.sendIR(item,ChineseLED->_length + 2);
-			vTaskDelay(2000 / portTICK_PERIOD_MS);
-			//test the New Function in a way..
-		}
-		address = 0x0;
-		data = 0x0;
-		ChineseLEDDriver->GenerateOutPutRaw(item, 0x00F7C837);
-		ChineseLEDDriver->DecodeInput(item, address, data);
-		printf("Some important address : %04x and data %04x \n",address,data);
-		irsend.sendIR(item,ChineseLED->_length + 2);
-		vTaskDelay(10000 / portTICK_PERIOD_MS);
+		 vTaskDelay(2000 / portTICK_PERIOD_MS);
 	}
-	*/
+
 	vTaskDelete(NULL);
 }
 
@@ -245,6 +235,7 @@ void app_main(void) {
 	gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void*) GPIO_INPUT_IO_0);
 
 	xTaskCreate(rmtOutput, "test task", 2048, NULL , 10, NULL);
+//	xTaskCreate(rtmInput, "test task", 2048, NULL , 10, NULL);
 	while(1) {
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
